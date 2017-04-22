@@ -1,6 +1,9 @@
 
+src_files=main.cpp database.cpp
+gen_files=parser.tab.c lex.yy.c
+
 all: bison flex
-	g++ parser.tab.c lex.yy.c -o parser
+	g++ -g -o parser ${src_files} ${gen_files}
 
 bison:
 	bison -d parser.y
