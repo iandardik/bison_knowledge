@@ -3,17 +3,21 @@
 
 #include <set>
 #include <string>
-
-typedef std::string Ingredient;
+#include "helpers.h"
 
 class Recipe {
 public:
-	void AddIngredient(const Ingredient& i);
-	bool ContainsIngredient(const Ingredient& i) const;
+	Recipe();
+	Recipe(const std::set<NounKey>& ingredients);
+
+	void AddIngredient(const NounKey& i);
+	bool ContainsIngredient(const NounKey& i) const;
+	std::set< NounKey > GetIngredients() const;
+	std::string ToString() const;
 	bool operator==(const Recipe& other) const;
 
 private:
-	std::set< Ingredient > m_ingredients;
+	std::set< NounKey > m_ingredients;
 };
 
 #endif /* _H_RECIPE */

@@ -3,9 +3,13 @@
 
 #include <string>
 #include <map>
-#include "noun.h"
+#include <vector>
+#include "helpers.h"
 
-typedef std::string NounKey;
+class Noun;
+class Recipe;
+
+//typedef std::string NounKey;
 typedef std::map< NounKey, Noun > DatabaseMap_t;
 
 class Database {
@@ -13,6 +17,8 @@ public:
 	Noun& AddNoun(const NounKey& name);
 	bool Exists(const NounKey& k) const;
 	Noun& operator[](const NounKey& k);
+	std::vector<NounKey> FindNounsWithIngredientInCache(const NounKey& i);
+	bool FindNounsWithRecipeInCache(const Recipe& r, std::vector<NounKey>& matchingNouns);
 
 private:
 	DatabaseMap_t m_db;

@@ -1,5 +1,5 @@
 
-src_files=main.cpp database.cpp noun.cpp recipe.cpp
+src_files=main.cpp database.cpp noun.cpp recipe.cpp helpers.cpp
 gen_files=parser.tab.c lex.yy.c
 
 all: bison flex compile
