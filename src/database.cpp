@@ -4,7 +4,7 @@ Noun& Database::AddNoun(const NounKey& name) {
 	return (m_db[name] = Noun());
 }
 
-bool Database::Exists(const NounKey& k) {
+bool Database::Exists(const NounKey& k) const {
 	return m_db.find(k) != m_db.end();
 }
 

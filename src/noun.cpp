@@ -1,24 +1,12 @@
 #include "noun.h"
-#include <algorithm>
-
-void Noun::AddAttribute(const Attribute& a) {
-	m_attributes.push_back(a);
-}
-
-std::vector< Attribute > Noun::GetAttributes() const {
-	return m_attributes;
-}
-
-bool Noun::HasAttribute(const Attribute& a) const {
-	return std::find( m_attributes.begin(), m_attributes.end(), a ) != m_attributes.end();
-}
+#include "helpers.h"
 
 void Noun::AddRecipe(const Recipe& r) {
 	m_recipes.push_back(r);
 }
 
-std::vector< Recipe > Noun::GetRecipes() const {
-	return m_recipes;
+bool Noun::HasRecipe(const Recipe& r) const {
+	return ARRAY_EXISTS( m_recipes, r );
 }
 
 // for the time being we'll do a simple look up.  in the future we'll consider
@@ -28,7 +16,7 @@ std::vector< Recipe > Noun::GetRecipes() const {
 bool Noun::FindRecipe(const Ingredient& ingr, Recipe& r) const {
 	for (int i = 0; i < m_recipes.size(); ++i) {
 		const Recipe& myRecipe = m_recipes[i];
-		if ( std::find( myRecipe.begin(), myRecipe.end(), ingr ) != myRecipe.end() ) {
+		if ( myRecipe.ContainsIngredient(ingr) ) {
 			r = myRecipe;
 			return true;
 		}

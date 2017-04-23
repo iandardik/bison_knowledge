@@ -3,19 +3,12 @@
 
 #include <string>
 #include <vector>
-
-typedef std::string Attribute;
-typedef std::string Ingredient;
-typedef std::vector< Ingredient > Recipe;
+#include "recipe.h"
 
 class Noun {
 public:
-	void AddAttribute(const Attribute& a);
-	std::vector< Attribute > GetAttributes() const;
-	bool HasAttribute(const Attribute& a) const;
-
 	void AddRecipe(const Recipe& r);
-	std::vector< Recipe > GetRecipes() const;
+	bool HasRecipe(const Recipe& r) const;
 
 	// will find the first recipe possible and populate r with
 	// the result.  returns true if at least one recipe can be found,
@@ -23,7 +16,6 @@ public:
 	bool FindRecipe(const Ingredient& i, Recipe& r) const;
 
 private:
-	std::vector< Attribute > m_attributes;
 	std::vector< Recipe > m_recipes;
 };
 

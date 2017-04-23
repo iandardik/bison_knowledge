@@ -5,16 +5,16 @@
 #include "database.h"
 
 namespace Statements {
-	void AddNounWithAttribute(Database* db, const NounKey& n, const Attribute& a) {
+	void AddRecipe(Database* db, const NounKey& n, const Recipe* r) {
 		if ( !db->Exists(n) ) {
 			db->AddNoun(n);
 		}
-		(*db)[n].AddAttribute(a);
+		(*db)[n].AddRecipe(*r);
 	}
 
-	bool DoesNounHaveAttribute(Database* db, const NounKey& n, const Attribute& a) {
+	bool IsValidRecipe(Database* db, const NounKey& n, const Recipe* r) {
 		if ( db->Exists(n) ) {
-			return (*db)[n].HasAttribute(a);
+			return (*db)[n].HasRecipe(*r);
 		}
 		return false;
 	}
