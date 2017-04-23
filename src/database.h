@@ -3,17 +3,19 @@
 
 #include <string>
 #include <map>
+#include "noun.h"
 
-typedef std::map< std::string, std::string > map_t;
+typedef std::string NounKey;
+typedef std::map< NounKey, Noun > Map_t;
 
 class Database {
 public:
-	void AddNoun(const std::string& n);
-	void AddNoun(const std::string& n, const std::string& v);
-	bool LookUp(const std::string& n, const std::string& v);
+	Noun& AddNoun(const NounKey& name);
+	bool Exists(const NounKey& k);
+	Noun& operator[](const NounKey& k);
 
 private:
-	map_t m_db;
+	Map_t m_db;
 };
 
 #endif /* _H_DATABASE */

@@ -3,6 +3,7 @@
 	#include <cstdio>
 	#include <iostream>
 	#include "database.h"
+	#include "statements.h"
 	using namespace std;
 
 	// stuff from flex that bison needs to know about:
@@ -22,30 +23,30 @@
 
 %token THE IS
 %token <val> STRING
-%type <val> noun value
+%type <val> noun adjective
 
 %start statements
 
 %%
 
 statements:
-		statement									{}
-		| statements statement		{}
+			statement										{}
+		| statements statement				{}
 		;
 
 statement:
-		noun IS value							{ db->AddNoun( $1, $3 ); }
-		| THE noun IS value				{ db->AddNoun( $2, $4 ); }
-		| IS noun value						{ cout << (db->LookUp( $2, $3 ) ? "Yes" : "No") << endl; }
-		| IS THE noun value				{ cout << (db->LookUp( $3, $4 ) ? "Yes" : "No") << endl; }
+			noun IS adjective						{ Statements::AddNounWithAttribute(db,$1,$3); }
+		| THE noun IS adjective				{ Statements::AddNounWithAttribute(db,$2,$4); }
+		| IS noun adjective						{ cout << (Statements::DoesNounHaveAttribute(db,$2,$3) ? "Yes" : "No") << endl; }
+		| IS THE noun adjective				{ cout << (Statements::DoesNounHaveAttribute(db,$3,$4) ? "Yes" : "No") << endl; }
 		;
 
 noun:
-		STRING 										{ $$ = $1; }
+			STRING 											{ $$ = $1; }
 		;
 
-value:
-		STRING 										{ $$ = $1; }
+adjective:
+			STRING 											{ $$ = $1; }
 		;
 
 %%
