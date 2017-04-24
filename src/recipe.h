@@ -8,16 +8,17 @@
 class Recipe {
 public:
 	Recipe();
-	Recipe(const std::set<NounKey>& ingredients);
+	Recipe(const std::multiset<NounKey>& ingredients);
 
 	void AddIngredient(const NounKey& i);
 	bool ContainsIngredient(const NounKey& i) const;
-	std::set< NounKey > GetIngredients() const;
-	std::string ToString() const;
+	std::multiset< NounKey > GetIngredients() const;
+	size_t NumIngredients() const;
 	bool operator==(const Recipe& other) const;
+	std::string ToString() const;
 
 private:
-	std::set< NounKey > m_ingredients;
+	std::multiset< NounKey > m_ingredients;
 };
 
 #endif /* _H_RECIPE */

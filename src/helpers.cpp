@@ -1,41 +1,45 @@
 #include "helpers.h"
+#include "recipe.h"
 
-std::set< std::set<NounKey> > NonNullPowerSet( const std::set<NounKey>& ingr ) {
-	std::set< std::set<NounKey> > ps = PowerSet(ingr);
-	ps.erase( std::set<NounKey>() );
+std::set< std::multiset<NounKey> > NonNullPowerSet( const std::multiset<NounKey>& ingr ) {
+	std::set< std::multiset<NounKey> > ps = PowerSet(ingr);
+	ps.erase( std::multiset<NounKey>() );
 	return ps;
 }
 
-std::set< std::set<NounKey> > PowerSet( const std::set<NounKey>& ingr ) {
+std::set< std::multiset<NounKey> > PowerSet( const std::multiset<NounKey>& ingr ) {
 	// base case
 	if ( ingr.size() == 0 ) {
-		std::set< std::set<NounKey> > rv;
-		rv.insert( std::set<NounKey>() );
+		std::set< std::multiset<NounKey> > rv;
+		rv.insert( std::multiset<NounKey>() );
 		return rv;
 	}
 
 	// recursive step
-	std::set<NounKey> recIngredients( ingr );
+	std::multiset<NounKey> recIngredients( ingr );
 	NounKey otherIngredient = *recIngredients.begin();
 	recIngredients.erase( recIngredients.begin() );
-	std::set< std::set<NounKey> > recursiveResult = PowerSet(recIngredients);
+	std::set< std::multiset<NounKey> > recursiveResult = PowerSet(recIngredients);
 
-	for (std::set< std::set<NounKey> >::const_iterator i = recursiveResult.begin(); i != recursiveResult.end(); ++i) {
-		const std::set<NounKey>& rrElem = *i;
-		std::set<NounKey> withOtherIngredient( rrElem );
+	std::set< std::multiset<NounKey> > rvPS;
+	for (std::set< std::multiset<NounKey> >::const_iterator i = recursiveResult.begin(); i != recursiveResult.end(); ++i) {
+		const std::multiset<NounKey>& rrElem = *i;
+		std::multiset<NounKey> withOtherIngredient( rrElem );
 		withOtherIngredient.insert( otherIngredient );
-		recursiveResult.insert( withOtherIngredient );
+
+		rvPS.insert(rrElem);
+		rvPS.insert(withOtherIngredient);
 	}
 	
-	return recursiveResult;
+	return rvPS;
 }
 
 template<typename T>
-std::set<T> SetMinus( const std::set<T>& a, const std::set<T>& b ) {
-	std::set<T> rv(a);
-	for (typename std::set<T>::const_iterator i = b.begin(); i != b.end(); ++i) {
+std::multiset<T> SetMinus( const std::multiset<T>& a, const std::multiset<T>& b ) {
+	std::multiset<T> rv(a);
+	for (typename std::multiset<T>::const_iterator i = b.begin(); i != b.end(); ++i) {
 		rv.erase(*i);
 	}
 	return rv;
 }
-template std::set<NounKey> SetMinus( const std::set<NounKey>&, const std::set<NounKey>& );
+template std::multiset<NounKey> SetMinus( const std::multiset<NounKey>&, const std::multiset<NounKey>& );

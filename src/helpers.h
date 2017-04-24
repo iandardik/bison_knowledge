@@ -12,12 +12,14 @@ typedef std::string NounKey;
 
 #define ARRAY_EXISTS( container, value ) \
 	std::find( (container).begin(), (container).end(), (value) ) != (container).end()
+#define ARRAY_MISSING( container, value ) \
+	std::find( (container).begin(), (container).end(), (value) ) == (container).end()
 
 // the power set minus the null set
-std::set< std::set<NounKey> > NonNullPowerSet( const std::set<NounKey>& ingr );
-std::set< std::set<NounKey> > PowerSet( const std::set<NounKey>& ingr );
+std::set< std::multiset<NounKey> > NonNullPowerSet( const std::multiset<NounKey>& ingr );
+std::set< std::multiset<NounKey> > PowerSet( const std::multiset<NounKey>& ingr );
 
 template<typename T>
-std::set<T> SetMinus( const std::set<T>& a, const std::set<T>& b );
+std::multiset<T> SetMinus( const std::multiset<T>& a, const std::multiset<T>& b );
 
 #endif /* _H_HELPERS */

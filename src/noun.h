@@ -28,7 +28,7 @@ public:
 	static Database* m_db;
 
 private:
-	void UpdateCacheForRecipe(const Recipe& r);
+	bool SearchDBForRecipe(const Recipe& r);
 
 	NounRecipeContainer_t m_recipes;
 };

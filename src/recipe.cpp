@@ -4,7 +4,7 @@ Recipe::Recipe()
 	: m_ingredients()
 {}
 
-Recipe::Recipe(const std::set<NounKey>& ingredients)
+Recipe::Recipe(const std::multiset<NounKey>& ingredients)
 	: m_ingredients(ingredients)
 {}
 
@@ -16,22 +16,12 @@ bool Recipe::ContainsIngredient(const NounKey& i) const {
 	return m_ingredients.find(i) != m_ingredients.end();
 }
 
-std::set< NounKey > Recipe::GetIngredients() const {
+std::multiset< NounKey > Recipe::GetIngredients() const {
 	return m_ingredients;
 }
 
-std::string Recipe::ToString() const {
-	std::string output("[");
-	for (std::set< NounKey >::const_iterator i = m_ingredients.begin(); i != m_ingredients.end(); ++i) {
-		output += *i;
-		std::set< NounKey >::const_iterator iLookahead = i;
-		++iLookahead;
-		if ( iLookahead != m_ingredients.end() ) {
-			output += ",";
-		}
-	}
-	output += "]";
-	return output;
+size_t Recipe::NumIngredients() const {
+	return m_ingredients.size();
 }
 
 bool Recipe::operator==(const Recipe& other) const {
@@ -42,4 +32,18 @@ bool Recipe::operator==(const Recipe& other) const {
 
 	// if the ingredients are the same then the recipes are the same
 	return this->m_ingredients == other.m_ingredients;
+}
+
+std::string Recipe::ToString() const {
+	std::string output("[");
+	for (std::multiset< NounKey >::const_iterator i = m_ingredients.begin(); i != m_ingredients.end(); ++i) {
+		output += *i;
+		std::multiset< NounKey >::const_iterator iLookahead = i;
+		++iLookahead;
+		if ( iLookahead != m_ingredients.end() ) {
+			output += ",";
+		}
+	}
+	output += "]";
+	return output;
 }

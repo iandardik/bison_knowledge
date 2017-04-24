@@ -5,19 +5,19 @@
 Database* Noun::m_db = 0;
 
 void Noun::AddRecipe(const Recipe& r) {
-	m_recipes.push_back(r);
+	if ( ARRAY_MISSING( m_recipes, r ) ) {
+		m_recipes.push_back(r);
+	}
 }
 
 bool Noun::HasRecipe(const Recipe& r) {
-	/*
 	if ( HasRecipeInCache(r) ) {
 		return true;
 	}
-	*/
 
 	// update the cache and try again
-	UpdateCacheForRecipe(r);
-	return HasRecipeInCache(r);
+	return SearchDBForRecipe(r);
+	//return HasRecipeInCache(r);
 }
 
 bool Noun::HasIngredientInCache(const NounKey& ingr) const {
@@ -46,36 +46,47 @@ bool Noun::FindRecipe(const NounKey& ingr, Recipe& r) const {
 	return false;
 }
 
-// we need to change the strategy here a bit.  instead of updating the cache, we should be updating the recipe list
-// to reduce the number of ingredients until we get a cache hit
-void Noun::UpdateCacheForRecipe(const Recipe& recipe) {
+// this function works by reducing the size of the ingredient list until we find a matching recipe
+bool Noun::SearchDBForRecipe(const Recipe& recipe) {
 	if ( HasRecipeInCache(recipe) ) {
-		return;
+		return true;
+	}
+	if ( recipe.NumIngredients() <= 1 && !HasRecipeInCache(recipe) ) {
+		return false;
 	}
 
-	const std::set< std::set<NounKey> > potentialNewRecipes = NonNullPowerSet( recipe.GetIngredients() );
+	const std::set< std::multiset<NounKey> > potentialNewRecipes = NonNullPowerSet( recipe.GetIngredients() );
 
-	for (std::set< std::set<NounKey> >::const_iterator i = potentialNewRecipes.begin(); i != potentialNewRecipes.end(); ++i) {
-		const std::set<NounKey>& potentialNewRecipe = *i;
-		const std::set<NounKey>& remainingIngredients = SetMinus( recipe.GetIngredients(), potentialNewRecipe );
+	for (std::set< std::multiset<NounKey> >::const_iterator i = potentialNewRecipes.begin(); i != potentialNewRecipes.end(); ++i) {
+		const std::multiset<NounKey>& potentialNewRecipe = *i;
+		const std::multiset<NounKey>& remainingIngredients = SetMinus( recipe.GetIngredients(), potentialNewRecipe );
 
 		// TODO change to m_db->FindNounsWithRecipe() (i.e. not just in the cache)
 		std::vector<NounKey> matchingNouns;
 		if ( m_db->FindNounsWithRecipeInCache( Recipe(potentialNewRecipe), matchingNouns ) ) {
+
 			for (int j = 0; j < matchingNouns.size(); ++j) {
 				const NounKey& newIngredient = matchingNouns[j];
-				//std::cout << "Found intermediate ingredient: " << newIngredient << std::endl;
-				std::set<NounKey> newIngredientList(remainingIngredients);
+				std::multiset<NounKey> newIngredientList(remainingIngredients);
 				newIngredientList.insert(newIngredient);
 				Recipe newRecipe(newIngredientList);
-				//AddRecipe(newRecipe);
-				AddRecipe(recipe);
-				
-				//UpdateCacheForRecipe(newRecipe);
-				//std::cout << "Added new recipe: " << newRecipe.ToString() << std::endl;
+
+				if ( HasRecipeInCache(newRecipe) ) {
+					AddRecipe(recipe);
+					return true;
+				}
+				else {
+					if ( SearchDBForRecipe(newRecipe) ) {
+						AddRecipe(recipe); // might not need this
+						return true;
+					}
+				}
 			}
+
 		}
 	}
+
+	return false;
 }
 
 bool Noun::HasRecipeInCache(const Recipe& recipe) const {
