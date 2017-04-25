@@ -14,6 +14,7 @@ bool Noun::HasRecipe(const Recipe& r) {
 	}
 
 	// update the cache and try again
+	ExpandIngredientsInCache();
 	return SearchDBForRecipe(r);
 	//return HasRecipeInCache(r);
 }
@@ -28,7 +29,7 @@ bool Noun::HasIngredientInCache(const NounKey& ingr) const {
 	return false;
 }
 
-NounRecipeContainer_t Noun::GetRecipes() const {
+NounRecipeContainer_t Noun::GetRecipesInCache() const {
 	return m_recipes;
 }
 
@@ -55,6 +56,7 @@ bool Noun::SearchDBForRecipe(const Recipe& recipe) {
 	}
 
 	for (const Recipe& recipeVariation : ExpandIngredientSet(recipe) ) {
+		//std::cout << "recipe variation: " << recipeVariation.ToString() << std::endl;
 		if ( HasRecipeInCache(recipeVariation) ) {
 			AddRecipe(recipe);
 			return true;
@@ -67,6 +69,14 @@ bool Noun::SearchDBForRecipe(const Recipe& recipe) {
 		}
 		*/
 	}
+	/*
+	std::cout << std::endl;
+	std::cout << "Cache:" << std::endl;
+	for ( const Recipe& r : m_recipes ) {
+		std::cout << "\t" << r.ToString() << std::endl;
+	}
+	std::cout << std::endl;
+	*/
 
 	return false;
 }
@@ -85,7 +95,7 @@ std::set<Recipe> Noun::ExpandIngredientSet(const Recipe& recipe) {
 	for ( const NounKey& rawIngredient : rawIngredients ) {
 		if ( mNounToRecipe.find(rawIngredient) == mNounToRecipe.end() ) {
 			// search the DB for a recipe for each ingredient
-			mNounToRecipe[rawIngredient] = m_db->FindCachedRecipesForNoun(rawIngredient);
+			mNounToRecipe[rawIngredient] = m_db->FindRecipesForNoun(rawIngredient);
 		}
 	}
 
@@ -146,4 +156,12 @@ bool Noun::ReduceIngredientSet(const Recipe& recipe) {
 
 bool Noun::HasRecipeInCache(const Recipe& recipe) const {
 	return m_recipes.find(recipe) != m_recipes.end();
+}
+
+void Noun::ExpandIngredientsInCache() {
+	for ( const Recipe& recipe : m_recipes ) {
+		for ( const Recipe& recipeVariant : ExpandIngredientSet(recipe) ) {
+			AddRecipe(recipeVariant);
+		}
+	}
 }

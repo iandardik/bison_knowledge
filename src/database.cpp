@@ -39,5 +39,22 @@ bool Database::FindNounsWithRecipeInCache(const Recipe& r, std::vector<NounKey>&
 }
 
 std::set<Recipe> Database::FindCachedRecipesForNoun(const NounKey& n) {
-	return m_db[n].GetRecipes();
+	return m_db[n].GetRecipesInCache();
 }
+
+// we really ought to just try constructing all possible recipes by looking
+// at each entry in the DB
+std::set<Recipe> Database::FindRecipesForNoun(const NounKey& n) {
+	//std::set<Recipe> recipesForNoun;
+	
+	Noun& noun = m_db[n];
+	for ( const Recipe& nounRecipe : noun.GetRecipesInCache() ) {
+		for ( const Recipe& recipeVariant : noun.ExpandIngredientSet(nounRecipe) ) {
+			noun.AddRecipe(recipeVariant);
+		}
+	}
+
+	return noun.GetRecipesInCache();
+}
+
+

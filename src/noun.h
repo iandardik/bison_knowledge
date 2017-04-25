@@ -17,19 +17,21 @@ public:
 
 	bool HasRecipeInCache(const Recipe& r) const;
 	bool HasIngredientInCache(const NounKey& i) const;
-	NounRecipeContainer_t GetRecipes() const;
+	NounRecipeContainer_t GetRecipesInCache() const;
 
 	// will find the first recipe possible and populate r with
 	// the result.  returns true if at least one recipe can be found,
 	// false otherwise.  
 	bool FindRecipe(const NounKey& i, Recipe& r) const;
 
+	bool SearchDBForRecipe(const Recipe& r);
+	std::set<Recipe> ExpandIngredientSet(const Recipe& r);
+
 	static Database* m_db;
 
 private:
-	bool SearchDBForRecipe(const Recipe& r);
-	std::set<Recipe> ExpandIngredientSet(const Recipe& r);
 	bool ReduceIngredientSet(const Recipe& r);
+	void ExpandIngredientsInCache();
 
 	NounRecipeContainer_t m_recipes;
 };

@@ -21,6 +21,7 @@ public:
 	std::vector<NounKey> FindNounsWithIngredientInCache(const NounKey& i);
 	bool FindNounsWithRecipeInCache(const Recipe& r, std::vector<NounKey>& matchingNouns);
 	std::set<Recipe> FindCachedRecipesForNoun(const NounKey& n);
+	std::set<Recipe> FindRecipesForNoun(const NounKey& n);
 
 private:
 	DatabaseMap_t m_db;
