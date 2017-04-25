@@ -5,9 +5,7 @@
 Database* Noun::m_db = 0;
 
 void Noun::AddRecipe(const Recipe& r) {
-	if ( ARRAY_MISSING( m_recipes, r ) ) {
-		m_recipes.push_back(r);
-	}
+	m_recipes.insert(r);
 }
 
 bool Noun::HasRecipe(const Recipe& r) {
@@ -22,8 +20,7 @@ bool Noun::HasRecipe(const Recipe& r) {
 
 bool Noun::HasIngredientInCache(const NounKey& ingr) const {
 	// check each recipe in the cache to see if it uses the specified ingredient
-	for (int i = 0; i < m_recipes.size(); ++i) {
-		const Recipe& recipe = m_recipes[i];
+	for (const Recipe& recipe : m_recipes) {
 		if ( recipe.ContainsIngredient(ingr) ) {
 			return true;
 		}
@@ -31,13 +28,16 @@ bool Noun::HasIngredientInCache(const NounKey& ingr) const {
 	return false;
 }
 
+NounRecipeContainer_t Noun::GetRecipes() const {
+	return m_recipes;
+}
+
 // for the time being we'll do a simple look up.  in the future we'll consider
 // the internal list as merely a cache, and we'll be able to apply some logic
 // to do some extra searching for additional recipes if we can't find any
 // recipes with the specified intredient.  
 bool Noun::FindRecipe(const NounKey& ingr, Recipe& r) const {
-	for (int i = 0; i < m_recipes.size(); ++i) {
-		const Recipe& myRecipe = m_recipes[i];
+	for (const Recipe& myRecipe : m_recipes) {
 		if ( myRecipe.ContainsIngredient(ingr) ) {
 			r = myRecipe;
 			return true;
@@ -46,7 +46,6 @@ bool Noun::FindRecipe(const NounKey& ingr, Recipe& r) const {
 	return false;
 }
 
-// this function works by reducing the size of the ingredient list until we find a matching recipe
 bool Noun::SearchDBForRecipe(const Recipe& recipe) {
 	if ( HasRecipeInCache(recipe) ) {
 		return true;
@@ -55,6 +54,62 @@ bool Noun::SearchDBForRecipe(const Recipe& recipe) {
 		return false;
 	}
 
+	for (const Recipe& recipeVariation : ExpandIngredientSet(recipe) ) {
+		if ( HasRecipeInCache(recipeVariation) ) {
+			AddRecipe(recipe);
+			return true;
+		}
+		
+		/*
+		if ( ReduceIngredientSet(recipeVariation) ) {
+			AddRecipe(recipe); // i think i sprinkle these around a bit too liberally
+			return true;
+		}
+		*/
+	}
+
+	return false;
+}
+
+// find all equivalent recipes that are currently cached by expanding the ingredient list
+std::set<Recipe> Noun::ExpandIngredientSet(const Recipe& recipe) {
+	std::set<Recipe> rvRecipes;
+	rvRecipes.insert(recipe);
+
+	// keep a map of each ingredient to recipes for that ingredient
+	std::map< NounKey, std::set<Recipe> > mNounToRecipe;
+
+	// fill the map with the ingredients
+	// for each ingredient we have, see we have a recipe for it in the DB
+	const std::multiset<NounKey>& rawIngredients = recipe.GetIngredients();
+	for ( const NounKey& rawIngredient : rawIngredients ) {
+		if ( mNounToRecipe.find(rawIngredient) == mNounToRecipe.end() ) {
+			// search the DB for a recipe for each ingredient
+			mNounToRecipe[rawIngredient] = m_db->FindCachedRecipesForNoun(rawIngredient);
+		}
+	}
+
+	// for each raw ingredient, replace it with any and all recipes for that ingredient.  we now have a
+	// new recipe for the original ingredient that we add to rvRecipes.  
+	for ( const NounKey& ingredient : rawIngredients ) {
+		//std::cout << "Trying to expand: " << ingredient << std::endl;
+		for ( const Recipe& ingrRecipe : mNounToRecipe[ingredient] ) {
+			//std::cout << ingredient << ": " << ingrRecipe.ToString() << std::endl;
+
+			std::set<Recipe> curRvRecipes(rvRecipes);
+			for ( const Recipe& curRvRecipe : curRvRecipes ) {
+				const std::set<Recipe> newRecipes = Recipe::ReplaceIngredientWithRecipe( curRvRecipe, ingredient, ingrRecipe );
+				std::copy( newRecipes.begin(), newRecipes.end(), std::inserter(rvRecipes,rvRecipes.end()) );
+			}
+		}
+	}
+
+	return rvRecipes;
+}
+
+// find all equivalent recipes that are currently cached by reducing the ingredient list
+// this function works by reducing the size of the ingredient list until we find a matching recipe
+bool Noun::ReduceIngredientSet(const Recipe& recipe) {
 	const std::set< std::multiset<NounKey> > potentialNewRecipes = NonNullPowerSet( recipe.GetIngredients() );
 
 	for (std::set< std::multiset<NounKey> >::const_iterator i = potentialNewRecipes.begin(); i != potentialNewRecipes.end(); ++i) {
@@ -90,5 +145,5 @@ bool Noun::SearchDBForRecipe(const Recipe& recipe) {
 }
 
 bool Noun::HasRecipeInCache(const Recipe& recipe) const {
-	return ARRAY_EXISTS( m_recipes, recipe );
+	return m_recipes.find(recipe) != m_recipes.end();
 }

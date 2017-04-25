@@ -17,8 +17,10 @@ public:
 	Noun& AddNoun(const NounKey& name);
 	bool Exists(const NounKey& k) const;
 	Noun& operator[](const NounKey& k);
+
 	std::vector<NounKey> FindNounsWithIngredientInCache(const NounKey& i);
 	bool FindNounsWithRecipeInCache(const Recipe& r, std::vector<NounKey>& matchingNouns);
+	std::set<Recipe> FindCachedRecipesForNoun(const NounKey& n);
 
 private:
 	DatabaseMap_t m_db;

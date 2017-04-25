@@ -5,7 +5,7 @@ gen_files=parser.tab.c lex.yy.c
 all: bison flex compile
 
 compile:
-	g++ -g -o parser ${src_files} ${gen_files}
+	g++ -std=c++11 -g -o parser ${src_files} ${gen_files}
 
 bison:
 	bison -d parser.y

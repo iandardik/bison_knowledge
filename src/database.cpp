@@ -37,3 +37,7 @@ bool Database::FindNounsWithRecipeInCache(const Recipe& r, std::vector<NounKey>&
 	}
 	return matchingNouns.size() > 0;
 }
+
+std::set<Recipe> Database::FindCachedRecipesForNoun(const NounKey& n) {
+	return m_db[n].GetRecipes();
+}
